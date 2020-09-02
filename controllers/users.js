@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { passwordSchema, key } = require('../config.js');
+const NotFoundError = require('../errors/not-found-error.js');
 
 const getUsers = (req, res) => {
   User.find({})
@@ -11,22 +12,22 @@ const getUsers = (req, res) => {
     .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
 };
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: 'Пользователь с таким ID не найден' });
-        return;
+        throw new NotFoundError('Пользователь с таким ID не найден');
       }
       res.send(user);
     })
-    .catch((err) => {
+    .catch(next);
+  /* .catch((err) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Ошибка валидации переданного идентификатора' });
         return;
       }
       res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
+    }); */
 };
 
 const createUser = (req, res) => {

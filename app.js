@@ -31,4 +31,14 @@ app.use('/users', auth, usersRouter);
 app.use('/signup', createUser);
 app.use('/signin', login);
 app.use('*', urlDoesNotExist);
+app.use((err, req, res) => {
+  const { statusCode = 500, message } = err;
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+});
 app.listen(PORT);
