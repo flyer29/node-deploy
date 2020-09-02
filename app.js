@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
+const { errors } = require('celebrate');
 const cardsRouter = require('./routes/cards.js');
 const usersRouter = require('./routes/users.js');
 const { createUser, login } = require('./controllers/users.js');
@@ -31,6 +32,7 @@ app.use('/users', auth, usersRouter);
 app.use('/signup', createUser);
 app.use('/signin', login);
 app.use('*', urlDoesNotExist);
+app.use(errors);
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res
