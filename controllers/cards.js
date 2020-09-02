@@ -1,4 +1,5 @@
 const Card = require('../models/card');
+const NotFoundError = require('../errors/not-found-error.js');
 
 const getAllCards = (req, res) => {
   Card.find({})
@@ -23,12 +24,11 @@ const createCard = (req, res) => {
     });
 };
 
-const deleteCardById = (req, res) => {
+const deleteCardById = (req, res, next) => {
   Card.findById(req.params.id)
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Карточка не найдена' });
-        return;
+        throw new NotFoundError('Карточка не найдена');
       }
       if (card.owner.toString() !== req.user._id) {
         res.status(403).send({ message: 'Вы не можете удалить эту карточку' });
@@ -42,16 +42,17 @@ const deleteCardById = (req, res) => {
           res.status(500).send({ message: 'На сервере произошла ошибка' });
         });
     })
-    .catch((err) => {
+    .catch(next);
+  /* .catch((err) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Ошибка валидации переданного идентификатора' });
         return;
       }
       res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
+    }); */
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.id,
     { $addToSet: { likes: req.user._id } },
@@ -59,21 +60,21 @@ const likeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
-        return;
+        throw new NotFoundError('Карточка не найдена');
       }
       res.send({ data: card });
     })
-    .catch((err) => {
+    .catch(next);
+/* .catch((err) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Ошибка валидации переданного идентификатора' });
         return;
       }
       res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
+    }); */
 };
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.id,
     { $pull: { likes: req.user._id } },
@@ -81,18 +82,18 @@ const dislikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
-        return;
+        throw new NotFoundError('Карточка не найдена');
       }
       res.send({ data: card });
     })
-    .catch((err) => {
+    .catch(next);
+  /* .catch((err) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Ошибка валидации переданного идентификатора' });
         return;
       }
       res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
+    }); */
 };
 
 module.exports = {

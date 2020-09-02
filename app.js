@@ -31,7 +31,7 @@ app.use('/users', auth, usersRouter);
 app.use('/signup', createUser);
 app.use('/signin', login);
 app.use('*', urlDoesNotExist);
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res
     .status(statusCode)
