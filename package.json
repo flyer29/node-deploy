@@ -1,7 +1,7 @@
 {
-  "name": "mesto-node-safety",
-  "version": "0.0.4",
-  "description": "mongo-DB test-project",
+  "name": "node-deploy",
+  "version": "0.0.1",
+  "description": "node.js deploy-project",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -9,15 +9,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/flyer29/mesto-node-safety.git"
+    "url": "git+https://github.com/flyer29/node-deploy.git"
   },
   "keywords": [],
   "author": "Andrey Borodin",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/flyer29/mesto-node-safety/issues"
+    "url": "https://github.com/flyer29/node-deploy/issues"
   },
-  "homepage": "https://github.com/flyer29/mesto-node-safety",
+  "homepage": "https://github.com/flyer29/node-deploy",
   "dependencies": {
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
