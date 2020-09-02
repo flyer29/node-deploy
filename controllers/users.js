@@ -4,12 +4,12 @@ const User = require('../models/user');
 const { passwordSchema, key } = require('../config.js');
 const NotFoundError = require('../errors/not-found-error.js');
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       res.send({ data: users });
     })
-    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
+    .catch(next);
 };
 
 const getUserById = (req, res, next) => {
@@ -21,13 +21,6 @@ const getUserById = (req, res, next) => {
       res.send(user);
     })
     .catch(next);
-  /* .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Ошибка валидации переданного идентификатора' });
-        return;
-      }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    }); */
 };
 
 const createUser = (req, res) => {
