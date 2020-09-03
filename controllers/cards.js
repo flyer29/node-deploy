@@ -14,14 +14,15 @@ const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ data: card }))
-    .catch(next);
-  /* .catch((err) => {
+    // .catch(next);
+    .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: err.message });
         return;
       }
       res.status(500).send({ message: 'На сервере произошла ошибка' });
-    }); */
+      // next();
+    });
 };
 
 const deleteCardById = (req, res, next) => {
