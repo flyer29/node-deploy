@@ -34,7 +34,15 @@ app.use('/signin', login);
 app.use('*', urlDoesNotExist);
 app.use(errors);
 app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
+  const { statusCode = 500, message, name } = err;
+  if (name === 'ValidationError') {
+    res.status(400).send({ message: err.message });
+    return;
+  }
+  if (name === 'MongoError') {
+    res.status(409).send({ message: 'Пользователь с таким email уже существует' });
+    return;
+  }
   res
     .status(statusCode)
     .send({

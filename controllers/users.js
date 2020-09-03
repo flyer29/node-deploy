@@ -4,7 +4,6 @@ const User = require('../models/user');
 const { passwordSchema, key } = require('../config.js');
 const NotFoundError = require('../errors/not-found-error.js');
 const BadRequestError = require('../errors/bad-request-error.js');
-// const ConflictError = require('../errors/conflict-error.js');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -35,8 +34,6 @@ const createUser = (req, res, next) => {
   } = req.body;
   if (password === undefined || !passwordSchema.validate(password)) {
     throw new BadRequestError('Необходимо указать корректный пароль');
-    /* res.status(400).send({ message: 'Необходимо указать корректный пароль' });
-    return; */
   }
   bcrypt.hash(password, 10)
     .then((hash) => {
@@ -56,22 +53,9 @@ const createUser = (req, res, next) => {
             email: user.email,
           });
         })
-        .catch((err) => {
-          if (err.name === 'ValidationError') {
-            res.status(400).send({ message: err.message });
-            return;
-          }
-          if (err.name === 'MongoError' && err.code === 11000) {
-            res.status(409).send({ message: 'Пользователь с таким email уже существует' });
-            return;
-          }
-          res.status(500).send({ message: 'На сервере произошла ошибка' });
-        });
+        .catch(next);
     })
     .catch(next);
-  /* .catch((err) => {
-      res.status(500).send({ message: err.message });
-    }); */
 };
 
 const login = (req, res, next) => {
@@ -90,16 +74,9 @@ const login = (req, res, next) => {
       }).end();
     })
     .catch(next);
-  /* .catch((err) => {
-      if (err.name === 'Error') {
-        res.status(401).send({ message: err.message });
-        return;
-      }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    }); */
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about },
     {
@@ -110,16 +87,10 @@ const updateProfile = (req, res) => {
     .then((user) => {
       res.send(user);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message });
-        return;
-      }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar },
     {
@@ -128,13 +99,7 @@ const updateAvatar = (req, res) => {
       upsert: true,
     })
     .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message });
-        return;
-      }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
 };
 
 module.exports = {
