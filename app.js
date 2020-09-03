@@ -32,10 +32,10 @@ app.use('/users', auth, usersRouter);
 app.use('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    about: Joi.string().min(2).max(30),
+    about: Joi.string().required().min(2).max(30),
     avatar: Joi.string().required(),
     email: Joi.string().required().email(),
-    password: Joi.string().alphanum().min(8),
+    password: Joi.string().required().alphanum().min(8),
   }),
 }), createUser);
 app.use('/signin', celebrate({
@@ -44,15 +44,19 @@ app.use('/signin', celebrate({
     password: Joi.string().alphanum().min(8),
   }),
 }), login);
-app.use('*', urlDoesNotExist);
-app.use(errors);
+app.use(errors());
 app.use((err, req, res, next) => {
-  const { statusCode = 500, message, name } = err;
+  const {
+    statusCode = 500,
+    message,
+    name,
+    code,
+  } = err;
   if (name === 'ValidationError') {
     res.status(400).send({ message: err.message });
     return;
   }
-  if (name === 'MongoError') {
+  if (name === 'MongoError' && code === 11000) {
     res.status(409).send({ message: 'Пользователь с таким email уже существует' });
     return;
   }
@@ -64,4 +68,5 @@ app.use((err, req, res, next) => {
         : message,
     });
 });
+app.use('*', urlDoesNotExist);
 app.listen(PORT);

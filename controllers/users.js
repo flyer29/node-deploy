@@ -82,7 +82,7 @@ const updateProfile = (req, res, next) => {
     {
       new: true,
       runValidators: true,
-      upsert: true,
+      upsert: false,
     })
     .then((user) => {
       res.send(user);
@@ -96,7 +96,7 @@ const updateAvatar = (req, res, next) => {
     {
       new: true,
       runValidators: true,
-      upsert: true,
+      upsert: false,
     })
     .then((user) => res.send(user))
     .catch(next);
