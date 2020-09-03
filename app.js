@@ -4,10 +4,10 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
-const cardsRouter = require('./routes/cards.js');
-const usersRouter = require('./routes/users.js');
-const { createUser, login } = require('./controllers/users.js');
-const { auth } = require('./middlewares/auth.js');
+const cardsRouter = require('./routes/cards');
+const usersRouter = require('./routes/users');
+const { createUser, login } = require('./controllers/users');
+const { auth } = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
 const app = express();
