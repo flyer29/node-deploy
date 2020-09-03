@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
-const { errors } = require('celebrate');
+const { celebrate, Joi, errors } = require('celebrate');
 const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
 const { createUser, login } = require('./controllers/users');
@@ -29,8 +29,21 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use('/cards', auth, cardsRouter);
 app.use('/users', auth, usersRouter);
-app.use('/signup', createUser);
-app.use('/signin', login);
+app.use('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().required(),
+    email: Joi.string().required().email(),
+    password: Joi.string().alphanum().min(8),
+  }),
+}), createUser);
+app.use('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().alphanum().min(8),
+  }),
+}), login);
 app.use('*', urlDoesNotExist);
 app.use(errors);
 app.use((err, req, res, next) => {
