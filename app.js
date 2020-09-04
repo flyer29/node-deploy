@@ -8,6 +8,7 @@ const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
 const { createUser, login } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -27,6 +28,7 @@ app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(requestLogger);
 app.use('/cards', auth, cardsRouter);
 app.use('/users', auth, usersRouter);
 app.use('/signup', celebrate({
@@ -44,6 +46,7 @@ app.use('/signin', celebrate({
     password: Joi.string().alphanum().min(8),
   }),
 }), login);
+app.use(errorLogger);
 app.use(errors());
 app.use((err, req, res, next) => {
   const {
