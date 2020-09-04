@@ -37,6 +37,13 @@ app.use(cookieParser());
 app.use(requestLogger);
 app.use('/cards', auth, cardsRouter);
 app.use('/users', auth, usersRouter);
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
+
 app.use('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
