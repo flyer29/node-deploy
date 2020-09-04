@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const { celebrate, Joi, errors } = require('celebrate');
+const rateLimit = require('express-rate-limit');
 const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
 const { createUser, login } = require('./controllers/users');
@@ -13,6 +14,10 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 const app = express();
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -24,7 +29,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 const urlDoesNotExist = (req, res) => {
   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 };
-
+app.use(limiter);
 app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
