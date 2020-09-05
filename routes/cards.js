@@ -1,5 +1,6 @@
 const cardsRouter = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
+const { urlValidation } = require('../config');
 
 const {
   getAllCards,
@@ -13,7 +14,7 @@ cardsRouter.get('/', getAllCards);
 cardsRouter.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required(),
+    link: Joi.string().required().custom(urlValidation),
   }),
 }), createCard);
 cardsRouter.delete('/:id', celebrate({
