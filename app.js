@@ -11,6 +11,7 @@ const usersRouter = require('./routes/users');
 const { createUser, login } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { urlValidation } = require('./config');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -48,7 +49,7 @@ app.use('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     about: Joi.string().required().min(2).max(30),
-    avatar: Joi.string().required(),
+    avatar: Joi.string().required().custom(urlValidation),
     email: Joi.string().required().email(),
     password: Joi.string().required().alphanum().min(8),
   }),
