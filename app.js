@@ -20,6 +20,9 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
 });
+const urlDoesNotExist = () => {
+  throw new NotFoundError('Запрашиваемый ресурс не найден');
+};
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -27,10 +30,6 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
   useUnifiedTopology: true,
 });
-
-const urlDoesNotExist = () => {
-  throw new NotFoundError('Запрашиваемый ресурс не найден');
-};
 
 app.use(limiter);
 app.use(helmet());

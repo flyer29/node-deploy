@@ -35,11 +35,8 @@ const createUser = (req, res, next) => {
     email,
     password,
   } = req.body;
-  if (User.findOne({ email })) {
-    throw new ConflictError('Пользователь с таким email уже существует');
-  }
   if (password === undefined || !passwordSchema.validate(password)) {
-    throw new BadRequestError('Необходимо указать корректный пароль');
+    throw new BadRequestError('Необходимо указать пароль, состоящий как минимум из 8 символов, включающих в себя цифры и буквы');
   }
   bcrypt.hash(password, 10)
     .then((hash) => {
@@ -59,7 +56,12 @@ const createUser = (req, res, next) => {
             email: user.email,
           });
         })
-        .catch(next);
+        .catch((err) => {
+          if (err.name === 'MongoError' && err.code === 11000) {
+            const error = new ConflictError('Пользователь с таким email уже существует');
+            next(error);
+          }
+        });
     })
     .catch(next);
 };
