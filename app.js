@@ -73,7 +73,7 @@ app.use((err, req, res, next) => {
     code,
   } = err;
   if (name === 'ValidationError') {
-    res.status(400).send({ message: err.message });
+    res.status(400).send({ message: `${message}` });
     return;
   }
   if (name === 'MongoError' && code === 11000) {
