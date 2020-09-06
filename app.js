@@ -57,7 +57,7 @@ app.use('/signup', celebrate({
 app.use('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().alphanum().min(8),
+    password: Joi.string().required().alphanum().min(8),
   }),
 }), login);
 app.use('*', urlDoesNotExist);
