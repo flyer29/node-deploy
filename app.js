@@ -12,6 +12,7 @@ const { createUser, login } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { urlValidation } = require('./config');
+const NotFoundError = require('./errors/not-found-error');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -27,9 +28,10 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
-const urlDoesNotExist = (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
+const urlDoesNotExist = () => {
+  throw new NotFoundError('Запрашиваемый ресурс не найден');
 };
+
 app.use(limiter);
 app.use(helmet());
 app.use(bodyParser.json());
