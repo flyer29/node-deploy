@@ -60,6 +60,7 @@ app.use('/signin', celebrate({
     password: Joi.string().alphanum().min(8),
   }),
 }), login);
+app.use('*', urlDoesNotExist);
 app.use(errorLogger);
 app.use(errors());
 app.use((err, req, res, next) => {
@@ -86,5 +87,4 @@ app.use((err, req, res, next) => {
     });
   next();
 });
-app.use('*', urlDoesNotExist);
 app.listen(PORT);
