@@ -6,6 +6,7 @@ const { passwordSchema } = require('../config');
 const { NODE_ENV, JWT_SECRET } = process.env;
 const NotFoundError = require('../errors/not-found-error');
 const BadRequestError = require('../errors/bad-request-error');
+const ConflictError = require('../errors/conflict-error');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -34,6 +35,9 @@ const createUser = (req, res, next) => {
     email,
     password,
   } = req.body;
+  if (User.findOne({ email })) {
+    throw new ConflictError('Пользователь с таким email уже существует');
+  }
   if (password === undefined || !passwordSchema.validate(password)) {
     throw new BadRequestError('Необходимо указать корректный пароль');
   }

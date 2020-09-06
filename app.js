@@ -70,14 +70,9 @@ app.use((err, req, res, next) => {
     statusCode = 500,
     message,
     name,
-    code,
   } = err;
   if (name === 'ValidationError') {
     res.status(400).send({ message: `${message}` });
-    return;
-  }
-  if (name === 'MongoError' && code === 11000) {
-    res.status(409).send({ message: 'Пользователь с таким email уже существует' });
     return;
   }
   res
