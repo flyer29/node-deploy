@@ -1,15 +1,19 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { passwordSchema, key } = require('../config.js');
-const NotFoundError = require('../errors/not-found-error.js');
+const { passwordSchema } = require('../config');
 
-const getUsers = (req, res) => {
+const { NODE_ENV, JWT_SECRET } = process.env;
+const NotFoundError = require('../errors/not-found-error');
+const BadRequestError = require('../errors/bad-request-error');
+const ConflictError = require('../errors/conflict-error');
+
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       res.send({ data: users });
     })
-    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
+    .catch(next);
 };
 
 const getUserById = (req, res, next) => {
@@ -21,16 +25,9 @@ const getUserById = (req, res, next) => {
       res.send(user);
     })
     .catch(next);
-  /* .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Ошибка валидации переданного идентификатора' });
-        return;
-      }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    }); */
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -39,8 +36,7 @@ const createUser = (req, res) => {
     password,
   } = req.body;
   if (password === undefined || !passwordSchema.validate(password)) {
-    res.status(400).send({ message: 'Необходимо указать корректный пароль' });
-    return;
+    throw new BadRequestError('Необходимо указать пароль, состоящий как минимум из 8 символов, включающих в себя цифры и буквы');
   }
   bcrypt.hash(password, 10)
     .then((hash) => {
@@ -61,29 +57,22 @@ const createUser = (req, res) => {
           });
         })
         .catch((err) => {
-          if (err.name === 'ValidationError') {
-            res.status(400).send({ message: err.message });
-            return;
-          }
           if (err.name === 'MongoError' && err.code === 11000) {
-            res.status(409).send({ message: 'Пользователь с таким email уже существует' });
-            return;
+            const error = new ConflictError('Пользователь с таким email уже существует');
+            next(error);
           }
-          res.status(500).send({ message: 'На сервере произошла ошибка' });
         });
     })
-    .catch((err) => {
-      res.status(500).send({ message: err.message });
-    });
+    .catch(next);
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        key,
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' },
       );
       res.cookie('jwt', token, {
@@ -92,51 +81,33 @@ const login = (req, res) => {
         sameSite: true,
       }).end();
     })
-    .catch((err) => {
-      if (err.name === 'Error') {
-        res.status(401).send({ message: err.message });
-        return;
-      }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about },
     {
       new: true,
       runValidators: true,
-      upsert: true,
+      upsert: false,
     })
     .then((user) => {
       res.send(user);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message });
-        return;
-      }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
 };
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar },
     {
       new: true,
       runValidators: true,
-      upsert: true,
+      upsert: false,
     })
     .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message });
-        return;
-      }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch(next);
 };
 
 module.exports = {
